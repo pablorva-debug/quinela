@@ -23,4 +23,14 @@ describe("matches template", () => {
     expect(byPhase.thirdPlace).toBe(1);
     expect(byPhase.final).toBe(1);
   });
+
+  it("uses country names instead of generic group placeholders", () => {
+    const allTeams = matches.flatMap((match) => [match.home, match.away]);
+
+    expect(allTeams).toContain("Mexico");
+    expect(allTeams).toContain("Argentina");
+    expect(allTeams.every((team) => !team.startsWith("Grupo "))).toBe(true);
+    expect(allTeams.every((team) => !team.includes(" Local "))).toBe(true);
+    expect(allTeams.every((team) => !team.includes(" Visitante "))).toBe(true);
+  });
 });
