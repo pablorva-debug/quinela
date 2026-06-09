@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { matches } from "./data/matches";
 import { scoreSubmission, sortLeaderboard } from "./lib/scoring";
+import { isPredictionComplete, toCompletedPredictions } from "./lib/predictions";
 import {
   getOrCreatePlayer,
   loadResults,
@@ -11,7 +12,6 @@ import {
 } from "./lib/storage";
 import { suggestPodium } from "./lib/podium";
 import type {
-  CompletedPrediction,
   Match,
   MatchResult,
   Player,
@@ -40,23 +40,6 @@ function emptyPredictions(): Record<string, Prediction> {
       }
     ])
   );
-}
-
-function toCompleted(predictions: Record<string, Prediction>): CompletedPrediction[] {
-  return matches.map((match) => {
-    const prediction = predictions[match.id];
-    return {
-      matchId: match.id,
-      homeScore: Number(prediction.homeScore),
-      awayScore: Number(prediction.awayScore),
-      advances: prediction.advances
-    };
-  });
-}
-
-function isPredictionComplete(match: Match, prediction: Prediction): boolean {
-  const hasScores = prediction.homeScore !== "" && prediction.awayScore !== "";
-  return hasScores && (!match.knockout || Boolean(prediction.advances));
 }
 
 function officialPodiumFromResults(results: MatchResult[]): Partial<PodiumPick> {
@@ -102,7 +85,7 @@ export default function App() {
     () => submissions.find((submission) => submission.playerId === player?.id),
     [player?.id, submissions]
   );
-  const completedPredictions = useMemo(() => toCompleted(predictions), [predictions]);
+  const completedPredictions = useMemo(() => toCompletedPredictions(matches, predictions), [predictions]);
   const suggestedPodium = useMemo(() => suggestPodium(matches, completedPredictions), [completedPredictions]);
   const finishedPodium = useMemo(() => officialPodiumFromResults(results), [results]);
   const leaderboard = useMemo(

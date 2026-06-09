@@ -1,4 +1,5 @@
 import type { Match, Prediction } from "../types";
+import { getAutoAdvance, isPredictionComplete } from "../lib/predictions";
 
 interface MatchPredictionCardProps {
   locked: boolean;
@@ -8,14 +9,19 @@ interface MatchPredictionCardProps {
 }
 
 export function MatchPredictionCard({ locked, match, prediction, onChange }: MatchPredictionCardProps) {
-  const complete =
-    prediction.homeScore !== "" && prediction.awayScore !== "" && (!match.knockout || Boolean(prediction.advances));
+  const complete = isPredictionComplete(match, prediction);
+  const autoAdvance = getAutoAdvance(match, prediction);
+  const tiedKnockout =
+    match.knockout &&
+    prediction.homeScore !== "" &&
+    prediction.awayScore !== "" &&
+    prediction.homeScore === prediction.awayScore;
 
   return (
     <article className={complete ? "match-card complete" : "match-card"}>
       <div className="match-meta">
         <span>{match.label}</span>
-        <span>{match.knockout ? "Avanza requerido" : "Marcador exacto"}</span>
+        <span>{match.knockout ? "Gana y avanza" : "Marcador exacto"}</span>
       </div>
       <div className="score-row">
         <span className="team-name">{match.home}</span>
@@ -41,16 +47,9 @@ export function MatchPredictionCard({ locked, match, prediction, onChange }: Mat
         <span className="team-name right">{match.away}</span>
       </div>
       {match.knockout ? (
-        <select
-          aria-label={`Quien avanza en ${match.label}`}
-          disabled={locked}
-          value={prediction.advances ?? ""}
-          onChange={(event) => onChange(match.id, { advances: event.target.value || undefined })}
-        >
-          <option value="">Avanza...</option>
-          <option value={match.home}>{match.home}</option>
-          <option value={match.away}>{match.away}</option>
-        </select>
+        <p className={tiedKnockout ? "advance-line invalid" : "advance-line"}>
+          {autoAdvance ? `Avanza: ${autoAdvance}` : "Debe haber ganador en eliminatoria."}
+        </p>
       ) : null}
     </article>
   );

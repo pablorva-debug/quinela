@@ -312,6 +312,21 @@ p {
   gap: 8px;
 }
 
+.advance-line {
+  margin: 10px 0 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #0d503b;
+  font-size: 0.82rem;
+  font-weight: 900;
+  background: rgba(13, 80, 59, 0.1);
+}
+
+.advance-line.invalid {
+  color: #7a281e;
+  background: rgba(182, 64, 47, 0.12);
+}
+
 .match-meta {
   grid-template-columns: 1fr auto;
   align-items: center;

@@ -139,7 +139,7 @@ export function PredictionsScreen({
       <div className="submit-dock">
         <div>
           {locked ? <Lock aria-hidden="true" size={18} /> : <CheckCircle2 aria-hidden="true" size={18} />}
-          <span>{locked ? "Enviado" : deadline.getTime() <= Date.now() ? "Cerrado" : "Listo cuando completes todo"}</span>
+          <span>{locked ? "Enviado" : deadline.getTime() <= Date.now() ? "Cerrado" : "Sin empates en KO"}</span>
         </div>
         {!locked ? (
           <button className="primary-button" disabled={!canSubmit || busy} type="button" onClick={onSubmit}>
