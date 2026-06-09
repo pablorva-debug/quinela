@@ -19,3 +19,7 @@ export function getResultWinner(
 
   return homeScore > awayScore ? "home" : "away";
 }
+
+export function getResultStatus(homeScore: number | "", awayScore: number | ""): MatchResult["status"] {
+  return homeScore === "" || awayScore === "" ? "pending" : "finished";
+}

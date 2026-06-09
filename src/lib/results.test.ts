@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Match } from "../types";
-import { getResultWinner } from "./results";
+import { getResultStatus, getResultWinner } from "./results";
 
 const groupMatch: Match = {
   id: "g-1",
@@ -35,5 +35,13 @@ describe("getResultWinner", () => {
 
   it("leaves knockout ties unresolved", () => {
     expect(getResultWinner(knockoutMatch, 1, 1)).toBeUndefined();
+  });
+});
+
+describe("getResultStatus", () => {
+  it("marks complete scores as finished and incomplete scores as pending", () => {
+    expect(getResultStatus(2, 1)).toBe("finished");
+    expect(getResultStatus("", 1)).toBe("pending");
+    expect(getResultStatus(2, "")).toBe("pending");
   });
 });

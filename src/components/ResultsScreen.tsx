@@ -1,7 +1,7 @@
-import { Save } from "lucide-react";
+﻿import { Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Match, MatchResult } from "../types";
-import { getResultWinner } from "../lib/results";
+import { getResultStatus, getResultWinner } from "../lib/results";
 
 interface ResultsScreenProps {
   busy: boolean;
@@ -57,7 +57,7 @@ interface ResultEditorProps {
 function ResultEditor({ busy, match, result, onSave }: ResultEditorProps) {
   const [homeScore, setHomeScore] = useState<number | "">(result?.homeScore ?? "");
   const [awayScore, setAwayScore] = useState<number | "">(result?.awayScore ?? "");
-  const [status, setStatus] = useState<MatchResult["status"]>(result?.status ?? "pending");
+  const status = getResultStatus(homeScore, awayScore);
   const winner = getResultWinner(match, homeScore, awayScore);
   const tiedKnockout =
     match.knockout && homeScore !== "" && awayScore !== "" && Number(homeScore) === Number(awayScore);
@@ -83,12 +83,7 @@ function ResultEditor({ busy, match, result, onSave }: ResultEditorProps) {
     <article className="match-card">
       <div className="match-meta">
         <span>{match.label}</span>
-        <select value={status} onChange={(event) => setStatus(event.target.value as MatchResult["status"])}>
-          <option value="pending">Pendiente</option>
-          <option value="finished">Final</option>
-          <option value="postponed">Postponed</option>
-          <option value="cancelled">Cancelado</option>
-        </select>
+        <span>{status === "finished" ? "Final" : "Pendiente"}</span>
       </div>
       <p className="fixture-line">
         {kickoff} · {match.venue}
@@ -131,3 +126,4 @@ function ResultEditor({ busy, match, result, onSave }: ResultEditorProps) {
     </article>
   );
 }
+
