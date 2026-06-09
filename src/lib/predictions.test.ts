@@ -9,6 +9,7 @@ const knockout: Match = {
   home: "Mexico",
   away: "Brazil",
   kickoff: "2026-07-01T00:00:00.000Z",
+  venue: "Dallas Stadium",
   knockout: true
 };
 

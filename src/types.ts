@@ -18,6 +18,7 @@ export interface Match {
   home: TeamCode;
   away: TeamCode;
   kickoff: string;
+  venue: string;
   knockout: boolean;
 }
 

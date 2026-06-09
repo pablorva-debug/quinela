@@ -71,6 +71,29 @@ export function PredictionsScreen({
         </div>
       </section>
 
+      {phaseOrder.map((phase) => {
+        const phaseMatches = matches.filter((match) => match.phase === phase);
+        return (
+          <details className="phase-group" key={phase} open={phase === "group" || phase === "final"}>
+            <summary>
+              <span>{phaseNames[phase]}</span>
+              <span>{phaseMatches.length}</span>
+            </summary>
+            <div className="match-list">
+              {phaseMatches.map((match) => (
+                <MatchPredictionCard
+                  key={match.id}
+                  locked={locked}
+                  match={match}
+                  prediction={predictions[match.id]}
+                  onChange={onPredictionChange}
+                />
+              ))}
+            </div>
+          </details>
+        );
+      })}
+
       <section className="podium-panel">
         <div className="section-title">
           <Sparkles aria-hidden="true" size={20} />
@@ -112,29 +135,6 @@ export function PredictionsScreen({
           </label>
         </div>
       </section>
-
-      {phaseOrder.map((phase) => {
-        const phaseMatches = matches.filter((match) => match.phase === phase);
-        return (
-          <details className="phase-group" key={phase} open={phase === "group" || phase === "final"}>
-            <summary>
-              <span>{phaseNames[phase]}</span>
-              <span>{phaseMatches.length}</span>
-            </summary>
-            <div className="match-list">
-              {phaseMatches.map((match) => (
-                <MatchPredictionCard
-                  key={match.id}
-                  locked={locked}
-                  match={match}
-                  prediction={predictions[match.id]}
-                  onChange={onPredictionChange}
-                />
-              ))}
-            </div>
-          </details>
-        );
-      })}
 
       <div className="submit-dock">
         <div>

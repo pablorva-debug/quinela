@@ -40,8 +40,29 @@ const phaseLabels: Record<MatchPhase, string> = {
   final: "Final"
 };
 
-function kickoffDate(dayOffset: number): string {
-  const date = new Date(Date.UTC(2026, 5, 11 + dayOffset, 19, 0, 0));
+const venues = [
+  "Mexico City Stadium",
+  "Estadio Guadalajara",
+  "Toronto Stadium",
+  "Los Angeles Stadium",
+  "Boston Stadium",
+  "BC Place Vancouver",
+  "New York New Jersey Stadium",
+  "San Francisco Bay Area Stadium",
+  "Philadelphia Stadium",
+  "Houston Stadium",
+  "Dallas Stadium",
+  "Estadio Monterrey",
+  "Miami Stadium",
+  "Atlanta Stadium",
+  "Seattle Stadium",
+  "Kansas City Stadium"
+];
+
+const kickoffHours = [18, 21, 0, 3];
+
+function kickoffDate(dayOffset: number, slot: number): string {
+  const date = new Date(Date.UTC(2026, 5, 11 + dayOffset, kickoffHours[slot % kickoffHours.length], 0, 0));
   return date.toISOString();
 }
 
@@ -52,6 +73,7 @@ function makeMatch(
   home: string,
   away: string,
   index: number,
+  venue: string,
   knockout = false
 ): Match {
   return {
@@ -60,7 +82,8 @@ function makeMatch(
     label,
     home,
     away,
-    kickoff: kickoffDate(index),
+    kickoff: kickoffDate(Math.floor(index / 4), index),
+    venue,
     knockout
   };
 }
@@ -75,7 +98,8 @@ const groupMatches = groupNames.flatMap((group, groupIndex) => {
       `${phaseLabels.group} - Grupo ${group}`,
       teams[homeIndex],
       teams[awayIndex],
-      globalIndex
+      globalIndex,
+      venues[globalIndex % venues.length]
     );
   });
 });
@@ -93,6 +117,7 @@ function makeKnockoutMatches(
       home,
       away,
       startIndex + index,
+      venues[(startIndex + index) % venues.length],
       true
     )
   );

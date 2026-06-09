@@ -10,6 +10,7 @@ const matches: Match[] = [
     home: "Mexico",
     away: "Canada",
     kickoff: "2026-06-11T00:00:00.000Z",
+    venue: "Mexico City Stadium",
     knockout: false
   },
   {
@@ -19,6 +20,7 @@ const matches: Match[] = [
     home: "Brazil",
     away: "Japan",
     kickoff: "2026-06-12T00:00:00.000Z",
+    venue: "Dallas Stadium",
     knockout: false
   },
   {
@@ -28,6 +30,7 @@ const matches: Match[] = [
     home: "Mexico",
     away: "Brazil",
     kickoff: "2026-07-19T00:00:00.000Z",
+    venue: "New York New Jersey Stadium",
     knockout: true
   }
 ];

@@ -1,6 +1,7 @@
 import { Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Match, MatchResult } from "../types";
+import { getResultWinner } from "../lib/results";
 
 interface ResultsScreenProps {
   busy: boolean;
@@ -57,7 +58,15 @@ function ResultEditor({ busy, match, result, onSave }: ResultEditorProps) {
   const [homeScore, setHomeScore] = useState<number | "">(result?.homeScore ?? "");
   const [awayScore, setAwayScore] = useState<number | "">(result?.awayScore ?? "");
   const [status, setStatus] = useState<MatchResult["status"]>(result?.status ?? "pending");
-  const [winner, setWinner] = useState<string>(result?.winner ?? "");
+  const winner = getResultWinner(match, homeScore, awayScore);
+  const tiedKnockout =
+    match.knockout && homeScore !== "" && awayScore !== "" && Number(homeScore) === Number(awayScore);
+  const kickoff = new Intl.DateTimeFormat("es-MX", {
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "short"
+  }).format(new Date(match.kickoff));
 
   function save() {
     onSave({
@@ -65,7 +74,7 @@ function ResultEditor({ busy, match, result, onSave }: ResultEditorProps) {
       homeScore,
       awayScore,
       status,
-      winner: winner || undefined,
+      winner,
       updatedAt: new Date().toISOString()
     });
   }
@@ -81,6 +90,9 @@ function ResultEditor({ busy, match, result, onSave }: ResultEditorProps) {
           <option value="cancelled">Cancelado</option>
         </select>
       </div>
+      <p className="fixture-line">
+        {kickoff} · {match.venue}
+      </p>
       <div className="score-row">
         <span className="team-name">{match.home}</span>
         <input
@@ -101,13 +113,18 @@ function ResultEditor({ busy, match, result, onSave }: ResultEditorProps) {
         <span className="team-name right">{match.away}</span>
       </div>
       <div className="result-actions">
-        <select value={winner} onChange={(event) => setWinner(event.target.value)}>
-          <option value="">Ganador...</option>
-          <option value={match.knockout ? match.home : "home"}>{match.home}</option>
-          <option value={match.knockout ? match.away : "away"}>{match.away}</option>
-          {!match.knockout ? <option value="draw">Empate</option> : null}
-        </select>
-        <button className="secondary-button" disabled={busy} type="button" onClick={save}>
+        <p className={tiedKnockout ? "advance-line invalid" : "advance-line"}>
+          {winner
+            ? winner === "home"
+              ? `Ganador: ${match.home}`
+              : winner === "away"
+                ? `Ganador: ${match.away}`
+                : winner === "draw"
+                  ? "Empate"
+                  : `Ganador: ${winner}`
+            : "Marcador pendiente."}
+        </p>
+        <button className="secondary-button" disabled={busy || tiedKnockout} type="button" onClick={save}>
           Guardar
         </button>
       </div>

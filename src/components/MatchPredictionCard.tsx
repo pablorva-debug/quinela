@@ -17,12 +17,22 @@ export function MatchPredictionCard({ locked, match, prediction, onChange }: Mat
     prediction.awayScore !== "" &&
     prediction.homeScore === prediction.awayScore;
 
+  const kickoff = new Intl.DateTimeFormat("es-MX", {
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "short"
+  }).format(new Date(match.kickoff));
+
   return (
     <article className={complete ? "match-card complete" : "match-card"}>
       <div className="match-meta">
         <span>{match.label}</span>
         <span>{match.knockout ? "Gana y avanza" : "Marcador exacto"}</span>
       </div>
+      <p className="fixture-line">
+        {kickoff} · {match.venue}
+      </p>
       <div className="score-row">
         <span className="team-name">{match.home}</span>
         <input

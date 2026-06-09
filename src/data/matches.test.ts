@@ -33,4 +33,10 @@ describe("matches template", () => {
     expect(allTeams.every((team) => !team.includes(" Local "))).toBe(true);
     expect(allTeams.every((team) => !team.includes(" Visitante "))).toBe(true);
   });
+
+  it("includes kickoff date and venue for every match", () => {
+    expect(
+      matches.every((match) => Number.isFinite(new Date(match.kickoff).getTime()) && match.venue.length > 0)
+    ).toBe(true);
+  });
 });
