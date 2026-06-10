@@ -398,6 +398,19 @@ p {
   margin-top: 0;
 }
 
+.dock-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dock-actions .primary-button,
+.dock-actions .secondary-button {
+  width: auto;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
 .leaderboard {
   display: grid;
   gap: 10px;

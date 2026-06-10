@@ -9,12 +9,14 @@ interface PredictionsScreenProps {
   completeCount: number;
   currentSubmission?: Submission;
   deadline: Date;
+  draftSavedAt: string;
   matches: Match[];
   podium: PodiumPick;
   predictions: Record<string, Prediction>;
   suggestedPodium: PodiumPick;
   onPodiumChange: (podium: PodiumPick) => void;
   onPredictionChange: (matchId: string, patch: Partial<Prediction>) => void;
+  onSaveDraft: () => void;
   onSubmit: () => void;
 }
 
@@ -44,12 +46,14 @@ export function PredictionsScreen({
   completeCount,
   currentSubmission,
   deadline,
+  draftSavedAt,
   matches,
   podium,
   predictions,
   suggestedPodium,
   onPodiumChange,
   onPredictionChange,
+  onSaveDraft,
   onSubmit
 }: PredictionsScreenProps) {
   const locked = Boolean(currentSubmission);
@@ -139,12 +143,23 @@ export function PredictionsScreen({
       <div className="submit-dock">
         <div>
           {locked ? <Lock aria-hidden="true" size={18} /> : <CheckCircle2 aria-hidden="true" size={18} />}
-          <span>{locked ? "Enviado" : deadline.getTime() <= Date.now() ? "Cerrado" : "Sin empates en KO"}</span>
+          <span>
+            {locked
+              ? "Enviado"
+              : draftSavedAt
+                ? `Guardado ${new Intl.DateTimeFormat("es-MX", { hour: "2-digit", minute: "2-digit" }).format(new Date(draftSavedAt))}`
+                : ""}
+          </span>
         </div>
         {!locked ? (
-          <button className="primary-button" disabled={!canSubmit || busy} type="button" onClick={onSubmit}>
-            {busy ? "Enviando..." : "Enviar picks"}
-          </button>
+          <div className="dock-actions">
+            <button className="secondary-button" disabled={busy} type="button" onClick={onSaveDraft}>
+              Guardar
+            </button>
+            <button className="primary-button" disabled={!canSubmit || busy} type="button" onClick={onSubmit}>
+              {busy ? "Enviando..." : "Enviar"}
+            </button>
+          </div>
         ) : null}
       </div>
     </section>

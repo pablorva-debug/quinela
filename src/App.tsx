@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { matches } from "./data/matches";
+import { resolveMatchTeams } from "./lib/bracket";
 import { scoreSubmission, sortLeaderboard } from "./lib/scoring";
 import { isPredictionComplete, toCompletedPredictions } from "./lib/predictions";
 import {
@@ -27,6 +28,7 @@ import { ResultsScreen } from "./components/ResultsScreen";
 import { RulesScreen } from "./components/RulesScreen";
 
 const deadline = new Date("2026-06-11T00:00:00");
+const draftKeyPrefix = "quiniela-pollito-draft";
 
 function emptyPredictions(): Record<string, Prediction> {
   return Object.fromEntries(
@@ -79,14 +81,23 @@ export default function App() {
   const [results, setResults] = useState<MatchResult[]>([]);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<string>("");
 
   const mode = storageMode();
+  const resolvedMatches = useMemo(
+    () =>
+      matches.map((match) => ({
+        ...match,
+        ...resolveMatchTeams(match, matches, predictions)
+      })),
+    [predictions]
+  );
   const currentSubmission = useMemo(
     () => submissions.find((submission) => submission.playerId === player?.id),
     [player?.id, submissions]
   );
-  const completedPredictions = useMemo(() => toCompletedPredictions(matches, predictions), [predictions]);
-  const suggestedPodium = useMemo(() => suggestPodium(matches, completedPredictions), [completedPredictions]);
+  const completedPredictions = useMemo(() => toCompletedPredictions(resolvedMatches, predictions), [predictions, resolvedMatches]);
+  const suggestedPodium = useMemo(() => suggestPodium(resolvedMatches, completedPredictions), [completedPredictions, resolvedMatches]);
   const finishedPodium = useMemo(() => officialPodiumFromResults(results), [results]);
   const leaderboard = useMemo(
     () =>
@@ -95,7 +106,7 @@ export default function App() {
       ),
     [finishedPodium, results, submissions]
   );
-  const completeCount = matches.filter((match) => isPredictionComplete(match, predictions[match.id])).length;
+  const completeCount = resolvedMatches.filter((match) => isPredictionComplete(match, predictions[match.id])).length;
   const canSubmit =
     Boolean(player) &&
     !currentSubmission &&
@@ -130,6 +141,36 @@ export default function App() {
       )
     }));
   }, [currentSubmission]);
+
+  useEffect(() => {
+    if (!player || currentSubmission) {
+      return;
+    }
+
+    const raw = window.localStorage.getItem(`${draftKeyPrefix}-${player.id}`);
+    if (!raw) {
+      return;
+    }
+
+    try {
+      const draft = JSON.parse(raw) as {
+        podium?: PodiumPick;
+        predictions?: Record<string, Prediction>;
+        savedAt?: string;
+      };
+      if (draft.predictions) {
+        setPredictions((current) => ({ ...current, ...draft.predictions }));
+      }
+      if (draft.podium) {
+        setPodium(draft.podium);
+      }
+      if (draft.savedAt) {
+        setDraftSavedAt(draft.savedAt);
+      }
+    } catch {
+      window.localStorage.removeItem(`${draftKeyPrefix}-${player.id}`);
+    }
+  }, [currentSubmission, player]);
 
   async function refreshData() {
     try {
@@ -175,6 +216,7 @@ export default function App() {
     try {
       const saved = await saveSubmission(player, podium, completedPredictions);
       setSubmissions((current) => [...current.filter((item) => item.id !== saved.id), saved]);
+      window.localStorage.removeItem(`${draftKeyPrefix}-${player.id}`);
       setActiveTab("leaderboard");
       setMessage("Predicciones enviadas. Ya quedaron bloqueadas.");
     } catch (error) {
@@ -182,6 +224,24 @@ export default function App() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function handleSaveDraft() {
+    if (!player || currentSubmission) {
+      return;
+    }
+
+    const savedAt = new Date().toISOString();
+    window.localStorage.setItem(
+      `${draftKeyPrefix}-${player.id}`,
+      JSON.stringify({
+        predictions,
+        podium,
+        savedAt
+      })
+    );
+    setDraftSavedAt(savedAt);
+    setMessage("Borrador guardado en este navegador.");
   }
 
   async function handleResult(result: MatchResult) {
@@ -221,12 +281,14 @@ export default function App() {
           completeCount={completeCount}
           currentSubmission={currentSubmission}
           deadline={deadline}
-          matches={matches}
+          draftSavedAt={draftSavedAt}
+          matches={resolvedMatches}
           podium={podium}
           predictions={predictions}
           suggestedPodium={suggestedPodium}
           onPodiumChange={setPodium}
           onPredictionChange={updatePrediction}
+          onSaveDraft={handleSaveDraft}
           onSubmit={handleSubmit}
         />
       ) : null}

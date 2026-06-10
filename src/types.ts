@@ -20,7 +20,14 @@ export interface Match {
   kickoff: string;
   venue: string;
   knockout: boolean;
+  homeSource?: BracketSource;
+  awaySource?: BracketSource;
 }
+
+export type BracketSource =
+  | { type: "qualifier"; seed: number }
+  | { type: "winner"; matchId: string }
+  | { type: "loser"; matchId: string };
 
 export interface Player {
   id: string;

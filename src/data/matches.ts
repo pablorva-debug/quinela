@@ -1,4 +1,4 @@
-import type { Match, MatchPhase } from "../types";
+import type { BracketSource, Match, MatchPhase } from "../types";
 
 const groupNames = Array.from({ length: 12 }, (_, index) =>
   String.fromCharCode("A".charCodeAt(0) + index)
@@ -18,8 +18,6 @@ const groupTeamsByGroup: Record<string, string[]> = {
   K: ["Portugal", "Congo DR", "Uzbekistan", "Colombia"],
   L: ["England", "Croatia", "Ghana", "Panama"]
 };
-
-const countryPool = groupNames.flatMap((group) => groupTeamsByGroup[group]);
 
 const roundRobinPairs = [
   [0, 1],
@@ -74,7 +72,9 @@ function makeMatch(
   away: string,
   index: number,
   venue: string,
-  knockout = false
+  knockout = false,
+  homeSource?: BracketSource,
+  awaySource?: BracketSource
 ): Match {
   return {
     id,
@@ -84,7 +84,9 @@ function makeMatch(
     away,
     kickoff: kickoffDate(Math.floor(index / 4), index),
     venue,
-    knockout
+    knockout,
+    homeSource,
+    awaySource
   };
 }
 
@@ -106,62 +108,75 @@ const groupMatches = groupNames.flatMap((group, groupIndex) => {
 
 function makeKnockoutMatches(
   phase: MatchPhase,
-  pairings: ReadonlyArray<readonly [string, string]>,
+  pairings: ReadonlyArray<readonly [BracketSource, BracketSource]>,
   startIndex: number
 ): Match[] {
-  return pairings.map(([home, away], index) =>
+  return pairings.map(([homeSource, awaySource], index) =>
     makeMatch(
       `${phase}-${index + 1}`,
       phase,
       `${phaseLabels[phase]} ${index + 1}`,
-      home,
-      away,
+      sourceLabel(homeSource),
+      sourceLabel(awaySource),
       startIndex + index,
       venues[(startIndex + index) % venues.length],
-      true
+      true,
+      homeSource,
+      awaySource
     )
   );
 }
 
-function pairTeams(teams: string[]): Array<readonly [string, string]> {
-  return Array.from({ length: teams.length / 2 }, (_, index) => [
-    teams[index],
-    teams[teams.length - 1 - index]
+function sourceLabel(source: BracketSource): string {
+  if (source.type === "qualifier") {
+    return `Clasificado ${source.seed}`;
+  }
+  return `${source.type === "winner" ? "Ganador" : "Perdedor"} ${source.matchId}`;
+}
+
+function pairSources(sources: BracketSource[]): Array<readonly [BracketSource, BracketSource]> {
+  return Array.from({ length: sources.length / 2 }, (_, index) => [
+    sources[index],
+    sources[sources.length - 1 - index]
   ]);
 }
 
-const roundOf32Teams = countryPool.slice(0, 32);
-const roundOf16Teams = [
-  "Mexico",
-  "Brazil",
-  "Germany",
-  "Argentina",
-  "France",
-  "Portugal",
-  "England",
-  "Spain",
-  "Canada",
-  "Netherlands",
-  "Belgium",
-  "Uruguay",
-  "USA",
-  "Colombia",
-  "Japan",
-  "Morocco"
+const qualifierSources: BracketSource[] = Array.from({ length: 32 }, (_, index) => ({
+  type: "qualifier",
+  seed: index + 1
+}));
+
+const roundOf32Pairings = pairSources(qualifierSources);
+const roundOf16Pairings = pairSources(
+  Array.from({ length: 16 }, (_, index) => ({ type: "winner", matchId: `roundOf32-${index + 1}` }) as BracketSource)
+);
+const quarterfinalPairings = pairSources(
+  Array.from({ length: 8 }, (_, index) => ({ type: "winner", matchId: `roundOf16-${index + 1}` }) as BracketSource)
+);
+const semifinalPairings = pairSources(
+  Array.from({ length: 4 }, (_, index) => ({ type: "winner", matchId: `quarterfinal-${index + 1}` }) as BracketSource)
+);
+const thirdPlacePairings: Array<readonly [BracketSource, BracketSource]> = [
+  [
+    { type: "loser", matchId: "semifinal-1" },
+    { type: "loser", matchId: "semifinal-2" }
+  ]
 ];
-const quarterfinalTeams = ["Mexico", "Brazil", "Argentina", "France", "Portugal", "England", "Spain", "Germany"];
-const semifinalTeams = ["Mexico", "Argentina", "France", "Portugal"];
-const thirdPlaceTeams = ["Mexico", "Portugal"];
-const finalTeams = ["Argentina", "France"];
+const finalPairings: Array<readonly [BracketSource, BracketSource]> = [
+  [
+    { type: "winner", matchId: "semifinal-1" },
+    { type: "winner", matchId: "semifinal-2" }
+  ]
+];
 
 export const matches: Match[] = [
   ...groupMatches,
-  ...makeKnockoutMatches("roundOf32", pairTeams(roundOf32Teams), 72),
-  ...makeKnockoutMatches("roundOf16", pairTeams(roundOf16Teams), 88),
-  ...makeKnockoutMatches("quarterfinal", pairTeams(quarterfinalTeams), 96),
-  ...makeKnockoutMatches("semifinal", pairTeams(semifinalTeams), 100),
-  ...makeKnockoutMatches("thirdPlace", pairTeams(thirdPlaceTeams), 102),
-  ...makeKnockoutMatches("final", pairTeams(finalTeams), 103)
+  ...makeKnockoutMatches("roundOf32", roundOf32Pairings, 72),
+  ...makeKnockoutMatches("roundOf16", roundOf16Pairings, 88),
+  ...makeKnockoutMatches("quarterfinal", quarterfinalPairings, 96),
+  ...makeKnockoutMatches("semifinal", semifinalPairings, 100),
+  ...makeKnockoutMatches("thirdPlace", thirdPlacePairings, 102),
+  ...makeKnockoutMatches("final", finalPairings, 103)
 ];
 
 export const teams = Array.from(new Set(matches.flatMap((match) => [match.home, match.away])));
