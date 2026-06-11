@@ -39,4 +39,41 @@ describe("matches template", () => {
       matches.every((match) => Number.isFinite(new Date(match.kickoff).getTime()) && match.venue.length > 0)
     ).toBe(true);
   });
+
+  it("uses official kickoff and venue for key fixtures", () => {
+    expect(matches.find((match) => match.id === "GA-1")).toMatchObject({
+      home: "Mexico",
+      away: "South Africa",
+      kickoff: "2026-06-11T19:00:00.000Z",
+      venue: "Estadio Azteca"
+    });
+    expect(matches.find((match) => match.id === "GA-4")).toMatchObject({
+      home: "Mexico",
+      away: "Korea Republic",
+      kickoff: "2026-06-19T01:00:00.000Z",
+      venue: "Estadio Akron"
+    });
+    expect(matches.find((match) => match.id === "roundOf32-1")).toMatchObject({
+      kickoff: "2026-06-28T19:00:00.000Z",
+      venue: "SoFi Stadium"
+    });
+    expect(matches.find((match) => match.id === "final-1")).toMatchObject({
+      kickoff: "2026-07-19T19:00:00.000Z",
+      venue: "MetLife Stadium"
+    });
+  });
+
+  it("does not schedule a group-stage team twice on the same UTC date", () => {
+    const datesByTeam = new Map<string, Set<string>>();
+
+    for (const match of matches.filter((item) => item.phase === "group")) {
+      const date = match.kickoff.slice(0, 10);
+      for (const team of [match.home, match.away]) {
+        const dates = datesByTeam.get(team) ?? new Set<string>();
+        expect(dates.has(date), `${team} is scheduled more than once on ${date}`).toBe(false);
+        dates.add(date);
+        datesByTeam.set(team, dates);
+      }
+    }
+  });
 });

@@ -59,8 +59,8 @@ describe("resolveMatchTeams", () => {
     const firstRoundOf32 = matches.find((match) => match.id === "roundOf32-1")!;
 
     expect(resolveMatchTeams(firstRoundOf32, matches, predictions)).toEqual({
-      home: "South Africa",
-      away: "Qatar"
+      home: "Mexico",
+      away: "Switzerland"
     });
   });
 
