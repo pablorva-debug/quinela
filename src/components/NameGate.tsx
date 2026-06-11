@@ -4,11 +4,10 @@ import { Drumstick } from "lucide-react";
 interface NameGateProps {
   busy: boolean;
   message: string;
-  mode: "supabase" | "demo";
   onSubmit: (name: string) => void;
 }
 
-export function NameGate({ busy, message, mode, onSubmit }: NameGateProps) {
+export function NameGate({ busy, message, onSubmit }: NameGateProps) {
   const [name, setName] = useState("");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -40,7 +39,6 @@ export function NameGate({ busy, message, mode, onSubmit }: NameGateProps) {
         <button className="primary-button" disabled={!name.trim() || busy} type="submit">
           {busy ? "Entrando..." : "Entrar"}
         </button>
-        <p className="fine-print">{mode === "supabase" ? "Conectado a Supabase." : "Modo demo local."}</p>
         {message ? <p className="form-error">{message}</p> : null}
       </form>
     </main>

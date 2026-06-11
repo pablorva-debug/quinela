@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { loadRememberedPlayerName, saveRememberedPlayerName } from "./playerMemory";
+import { clearRememberedPlayerName, loadRememberedPlayerName, saveRememberedPlayerName } from "./playerMemory";
 
 function stubLocalStorage(overrides: Partial<Storage> = {}) {
   const store = new Map<string, string>();
@@ -31,6 +31,15 @@ describe("playerMemory", () => {
     localStorage.setItem("quiniela-pollito-player-name", "Pablo");
 
     saveRememberedPlayerName("   ");
+
+    expect(localStorage.getItem("quiniela-pollito-player-name")).toBeNull();
+  });
+
+  it("clears the saved player name", () => {
+    const { localStorage } = stubLocalStorage();
+    localStorage.setItem("quiniela-pollito-player-name", "Pablo");
+
+    clearRememberedPlayerName();
 
     expect(localStorage.getItem("quiniela-pollito-player-name")).toBeNull();
   });

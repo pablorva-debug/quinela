@@ -33,3 +33,7 @@ export function saveRememberedPlayerName(name: string): void {
     // Some browsers can block localStorage. The app should still work normally.
   }
 }
+
+export function clearRememberedPlayerName(): void {
+  saveRememberedPlayerName("");
+}

@@ -3,14 +3,13 @@ import { matches } from "./data/matches";
 import { resolveMatchTeams } from "./lib/bracket";
 import { scoreSubmission, sortLeaderboard } from "./lib/scoring";
 import { isPredictionComplete, toCompletedPredictions } from "./lib/predictions";
-import { loadRememberedPlayerName, saveRememberedPlayerName } from "./lib/playerMemory";
+import { clearRememberedPlayerName, loadRememberedPlayerName, saveRememberedPlayerName } from "./lib/playerMemory";
 import {
   getOrCreatePlayer,
   loadResults,
   loadSubmissions,
   saveResult,
-  saveSubmission,
-  storageMode
+  saveSubmission
 } from "./lib/storage";
 import { suggestPodium } from "./lib/podium";
 import type {
@@ -84,7 +83,6 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string>("");
 
-  const mode = storageMode();
   const resolvedMatches = useMemo(
     () =>
       matches.map((match) => ({
@@ -203,6 +201,16 @@ export default function App() {
     }
   }
 
+  function handleChangeProfile() {
+    clearRememberedPlayerName();
+    setPlayer(null);
+    setActiveTab("predictions");
+    setPredictions(emptyPredictions());
+    setPodium({ champion: "", runnerUp: "", thirdPlace: "" });
+    setDraftSavedAt("");
+    setMessage("");
+  }
+
   function updatePrediction(matchId: string, patch: Partial<Prediction>) {
     setPredictions((current) => ({
       ...current,
@@ -266,7 +274,7 @@ export default function App() {
   }
 
   if (!player) {
-    return <NameGate busy={busy} message={message} mode={mode} onSubmit={handleName} />;
+    return <NameGate busy={busy} message={message} onSubmit={handleName} />;
   }
 
   return (
@@ -276,7 +284,6 @@ export default function App() {
           <p className="eyebrow">Quiniela Pollito 2026</p>
           <h1>Hola, {player.name}</h1>
         </div>
-        <span className="mode-pill">{mode === "supabase" ? "Supabase" : "Demo local"}</span>
       </header>
 
       {message ? <p className="toast">{message}</p> : null}
@@ -294,6 +301,7 @@ export default function App() {
           suggestedPodium={suggestedPodium}
           onPodiumChange={setPodium}
           onPredictionChange={updatePrediction}
+          onChangeProfile={handleChangeProfile}
           onSaveDraft={handleSaveDraft}
           onSubmit={handleSubmit}
         />

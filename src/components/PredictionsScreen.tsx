@@ -1,4 +1,4 @@
-import { CheckCircle2, Lock, Sparkles } from "lucide-react";
+import { CheckCircle2, Lock, Sparkles, UserRound } from "lucide-react";
 import type { CSSProperties } from "react";
 import type { Match, PodiumPick, Prediction, Submission } from "../types";
 import { MatchPredictionCard } from "./MatchPredictionCard";
@@ -15,6 +15,7 @@ interface PredictionsScreenProps {
   suggestedPodium: PodiumPick;
   onPodiumChange: (podium: PodiumPick) => void;
   onPredictionChange: (matchId: string, patch: Partial<Prediction>) => void;
+  onChangeProfile: () => void;
   onSaveDraft: () => void;
   onSubmit: () => void;
 }
@@ -51,6 +52,7 @@ export function PredictionsScreen({
   suggestedPodium,
   onPodiumChange,
   onPredictionChange,
+  onChangeProfile,
   onSaveDraft,
   onSubmit
 }: PredictionsScreenProps) {
@@ -68,8 +70,14 @@ export function PredictionsScreen({
           <p className="eyebrow">Quiniela abierta</p>
           <h2>{locked ? "Tus picks ya quedaron bloqueados." : `${completeCount}/${matches.length} partidos`}</h2>
         </div>
-        <div className="progress-ring" style={{ "--progress": `${progress}%` } as CSSProperties}>
-          {progress}%
+        <div className="status-actions">
+          <button className="profile-switch-button" disabled={busy} type="button" onClick={onChangeProfile}>
+            <UserRound aria-hidden="true" size={17} />
+            Cambiar perfil
+          </button>
+          <div className="progress-ring" style={{ "--progress": `${progress}%` } as CSSProperties}>
+            {progress}%
+          </div>
         </div>
       </section>
 

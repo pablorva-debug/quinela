@@ -239,6 +239,31 @@ p {
   color: #f2ae4a;
 }
 
+.status-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.profile-switch-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(255, 253, 247, 0.2);
+  border-radius: 8px;
+  min-height: 40px;
+  padding: 0 11px;
+  color: #fffdf7;
+  font-size: 0.78rem;
+  font-weight: 900;
+  background: rgba(255, 253, 247, 0.1);
+}
+
+.profile-switch-button:hover:not(:disabled) {
+  background: rgba(255, 253, 247, 0.16);
+}
+
 .progress-ring {
   --progress: 0%;
   width: 74px;
@@ -634,5 +659,23 @@ p {
     transform: translateX(50%);
     border: 1px solid rgba(16, 33, 25, 0.12);
     border-radius: 8px 8px 0 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-band {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .status-actions {
+    justify-content: space-between;
+  }
+
+  .profile-switch-button {
+    min-width: 0;
+    flex: 1;
+    justify-content: center;
   }
 }
