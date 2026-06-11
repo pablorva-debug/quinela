@@ -1,11 +1,12 @@
-import { BarChart3, ClipboardList, ListChecks, Trophy } from "lucide-react";
+import { BarChart3, ClipboardList, ListChecks, Trophy, UsersRound } from "lucide-react";
 
-export type Tab = "predictions" | "leaderboard" | "results" | "rules";
+export type Tab = "predictions" | "leaderboard" | "gamePredictions" | "results" | "rules";
 
 const tabs = [
   { id: "predictions" as const, label: "Picks", icon: ClipboardList },
   { id: "leaderboard" as const, label: "Tabla", icon: Trophy },
-  { id: "results" as const, label: "Resultados", icon: BarChart3 },
+  { id: "gamePredictions" as const, label: "Juegos", icon: UsersRound },
+  { id: "results" as const, label: "Result.", icon: BarChart3 },
   { id: "rules" as const, label: "Reglas", icon: ListChecks }
 ];
 

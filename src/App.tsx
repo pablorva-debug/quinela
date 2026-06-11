@@ -21,6 +21,7 @@ import type {
   Submission
 } from "./types";
 import { BottomNav, type Tab } from "./components/BottomNav";
+import { GamePredictionsScreen } from "./components/GamePredictionsScreen";
 import { LeaderboardScreen } from "./components/LeaderboardScreen";
 import { NameGate } from "./components/NameGate";
 import { PredictionsScreen } from "./components/PredictionsScreen";
@@ -291,6 +292,9 @@ export default function App() {
       ) : null}
 
       {activeTab === "leaderboard" ? <LeaderboardScreen rows={leaderboard} submissions={submissions} /> : null}
+      {activeTab === "gamePredictions" ? (
+        <GamePredictionsScreen matches={matches} submissions={submissions} />
+      ) : null}
       {activeTab === "results" ? (
         <ResultsScreen busy={busy} matches={matches} results={results} onSave={handleResult} />
       ) : null}
