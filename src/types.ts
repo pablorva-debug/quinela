@@ -25,7 +25,8 @@ export interface Match {
 }
 
 export type BracketSource =
-  | { type: "qualifier"; seed: number }
+  | { type: "groupPosition"; group: string; position: 1 | 2 | 3 }
+  | { type: "thirdPlace"; slot: string; eligibleGroups: string[] }
   | { type: "winner"; matchId: string }
   | { type: "loser"; matchId: string };
 

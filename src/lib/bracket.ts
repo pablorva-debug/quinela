@@ -67,35 +67,75 @@ function groupStandings(matches: Match[], predictions: Record<string, Prediction
   );
 }
 
-function qualifiers(matches: Match[], predictions: Record<string, Prediction>): string[] {
-  const byGroup = groupStandings(matches, predictions).reduce<Map<string, Standing[]>>((acc, standing) => {
+function standingsByGroup(matches: Match[], predictions: Record<string, Prediction>): Map<string, Standing[]> {
+  return groupStandings(matches, predictions).reduce<Map<string, Standing[]>>((acc, standing) => {
     const current = acc.get(standing.group) ?? [];
     current.push(standing);
     acc.set(standing.group, current);
     return acc;
   }, new Map());
-  const winners: Standing[] = [];
-  const runnersUp: Standing[] = [];
-  const thirds: Standing[] = [];
+}
 
-  for (const group of [...byGroup.keys()].sort()) {
-    const ranked = byGroup.get(group) ?? [];
-    if (ranked[0]) winners.push(ranked[0]);
-    if (ranked[1]) runnersUp.push(ranked[1]);
-    if (ranked[2]) thirds.push(ranked[2]);
-  }
+function groupPositionTeam(
+  matches: Match[],
+  predictions: Record<string, Prediction>,
+  group: string,
+  position: 1 | 2 | 3
+): string | undefined {
+  return standingsByGroup(matches, predictions).get(group)?.[position - 1]?.team;
+}
 
-  const bestThirds = thirds
+function thirdPlaceStandings(matches: Match[], predictions: Record<string, Prediction>): Standing[] {
+  const byGroup = standingsByGroup(matches, predictions);
+  return [...byGroup.keys()]
+    .sort()
+    .map((group) => byGroup.get(group)?.[2])
+    .filter((standing): standing is Standing => Boolean(standing))
     .sort(
       (a, b) =>
         b.points - a.points ||
         b.goalDifference - a.goalDifference ||
         b.goalsFor - a.goalsFor ||
         a.team.localeCompare(b.team)
-    )
-    .slice(0, 8);
+    );
+}
 
-  return [...winners, ...runnersUp, ...bestThirds].map((standing) => standing.team);
+function thirdPlaceAssignments(matches: Match[], predictions: Record<string, Prediction>): Map<string, string> {
+  const assigned = new Map<string, string>();
+  const usedGroups = new Set<string>();
+  const bestThirds = thirdPlaceStandings(matches, predictions).slice(0, 8);
+  const slots = matches
+    .filter((match) => match.phase === "roundOf32")
+    .flatMap((match) => [match.homeSource, match.awaySource])
+    .filter((source): source is BracketSource & { type: "thirdPlace" } => source?.type === "thirdPlace");
+
+  for (const slot of slots) {
+    const selected = bestThirds.find(
+      (standing) => slot.eligibleGroups.includes(standing.group) && !usedGroups.has(standing.group)
+    );
+    if (selected) {
+      assigned.set(slot.slot, selected.team);
+      usedGroups.add(selected.group);
+    }
+  }
+
+  return assigned;
+}
+
+function resolveThirdPlaceSource(
+  source: BracketSource & { type: "thirdPlace" },
+  matches: Match[],
+  predictions: Record<string, Prediction>
+): string | undefined {
+  return thirdPlaceAssignments(matches, predictions).get(source.slot);
+}
+
+function resolveGroupPositionSource(
+  source: BracketSource & { type: "groupPosition" },
+  matches: Match[],
+  predictions: Record<string, Prediction>
+): string | undefined {
+  return groupPositionTeam(matches, predictions, source.group, source.position);
 }
 
 function resolveSource(
@@ -107,8 +147,12 @@ function resolveSource(
     return undefined;
   }
 
-  if (source.type === "qualifier") {
-    return qualifiers(matches, predictions)[source.seed - 1];
+  if (source.type === "groupPosition") {
+    return resolveGroupPositionSource(source, matches, predictions);
+  }
+
+  if (source.type === "thirdPlace") {
+    return resolveThirdPlaceSource(source, matches, predictions);
   }
 
   const sourceMatch = matches.find((match) => match.id === source.matchId);

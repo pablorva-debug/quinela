@@ -17,6 +17,53 @@ function filledPredictions(): Record<string, Prediction> {
 }
 
 describe("resolveMatchTeams", () => {
+  it("uses official round of 32 sources", () => {
+    const firstRoundOf32 = matches.find((match) => match.id === "roundOf32-1")!;
+    const seventhRoundOf32 = matches.find((match) => match.id === "roundOf32-7")!;
+
+    expect(firstRoundOf32.homeSource).toEqual({ type: "groupPosition", group: "A", position: 2 });
+    expect(firstRoundOf32.awaySource).toEqual({ type: "groupPosition", group: "B", position: 2 });
+    expect(seventhRoundOf32.homeSource).toEqual({ type: "groupPosition", group: "A", position: 1 });
+    expect(seventhRoundOf32.awaySource).toEqual({
+      type: "thirdPlace",
+      slot: "M79",
+      eligibleGroups: ["C", "E", "F", "H", "I"]
+    });
+  });
+
+  it("uses official knockout continuity after the round of 32", () => {
+    expect(matches.find((match) => match.id === "roundOf16-1")).toMatchObject({
+      homeSource: { type: "winner", matchId: "roundOf32-1" },
+      awaySource: { type: "winner", matchId: "roundOf32-3" }
+    });
+    expect(matches.find((match) => match.id === "roundOf16-2")).toMatchObject({
+      homeSource: { type: "winner", matchId: "roundOf32-2" },
+      awaySource: { type: "winner", matchId: "roundOf32-5" }
+    });
+    expect(matches.find((match) => match.id === "quarterfinal-2")).toMatchObject({
+      homeSource: { type: "winner", matchId: "roundOf16-5" },
+      awaySource: { type: "winner", matchId: "roundOf16-6" }
+    });
+    expect(matches.find((match) => match.id === "semifinal-1")).toMatchObject({
+      homeSource: { type: "winner", matchId: "quarterfinal-1" },
+      awaySource: { type: "winner", matchId: "quarterfinal-2" }
+    });
+    expect(matches.find((match) => match.id === "final-1")).toMatchObject({
+      homeSource: { type: "winner", matchId: "semifinal-1" },
+      awaySource: { type: "winner", matchId: "semifinal-2" }
+    });
+  });
+
+  it("resolves official group-position sources in the round of 32", () => {
+    const predictions = filledPredictions();
+    const firstRoundOf32 = matches.find((match) => match.id === "roundOf32-1")!;
+
+    expect(resolveMatchTeams(firstRoundOf32, matches, predictions)).toEqual({
+      home: "South Africa",
+      away: "Qatar"
+    });
+  });
+
   it("does not let a quarterfinal loser appear in semifinals", () => {
     const predictions = filledPredictions();
     predictions["quarterfinal-1"] = { matchId: "quarterfinal-1", homeScore: 0, awayScore: 2 };
