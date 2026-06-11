@@ -293,7 +293,7 @@ export default function App() {
 
       {activeTab === "leaderboard" ? <LeaderboardScreen rows={leaderboard} submissions={submissions} /> : null}
       {activeTab === "gamePredictions" ? (
-        <GamePredictionsScreen matches={matches} submissions={submissions} />
+        <GamePredictionsScreen matches={matches} results={results} submissions={submissions} />
       ) : null}
       {activeTab === "results" ? (
         <ResultsScreen busy={busy} matches={matches} results={results} onSave={handleResult} />
