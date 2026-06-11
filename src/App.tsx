@@ -3,6 +3,7 @@ import { matches } from "./data/matches";
 import { resolveMatchTeams } from "./lib/bracket";
 import { scoreSubmission, sortLeaderboard } from "./lib/scoring";
 import { isPredictionComplete, toCompletedPredictions } from "./lib/predictions";
+import { loadRememberedPlayerName, saveRememberedPlayerName } from "./lib/playerMemory";
 import {
   getOrCreatePlayer,
   loadResults,
@@ -116,6 +117,12 @@ export default function App() {
     podium.thirdPlace;
 
   useEffect(() => {
+    const rememberedName = loadRememberedPlayerName();
+    if (rememberedName) {
+      void handleName(rememberedName);
+      return;
+    }
+
     void refreshData();
   }, []);
 
@@ -186,6 +193,7 @@ export default function App() {
     setMessage("");
     try {
       const nextPlayer = await getOrCreatePlayer(name);
+      saveRememberedPlayerName(nextPlayer.name);
       setPlayer(nextPlayer);
       await refreshData();
     } catch (error) {
