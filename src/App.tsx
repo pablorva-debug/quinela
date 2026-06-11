@@ -27,7 +27,6 @@ import { PredictionsScreen } from "./components/PredictionsScreen";
 import { ResultsScreen } from "./components/ResultsScreen";
 import { RulesScreen } from "./components/RulesScreen";
 
-const deadline = new Date("2026-06-11T00:00:00");
 const draftKeyPrefix = "quiniela-pollito-draft";
 
 function emptyPredictions(): Record<string, Prediction> {
@@ -113,8 +112,7 @@ export default function App() {
     completeCount === matches.length &&
     podium.champion &&
     podium.runnerUp &&
-    podium.thirdPlace &&
-    Date.now() < deadline.getTime();
+    podium.thirdPlace;
 
   useEffect(() => {
     void refreshData();
@@ -280,7 +278,6 @@ export default function App() {
           canSubmit={Boolean(canSubmit)}
           completeCount={completeCount}
           currentSubmission={currentSubmission}
-          deadline={deadline}
           draftSavedAt={draftSavedAt}
           matches={resolvedMatches}
           podium={podium}
@@ -297,7 +294,7 @@ export default function App() {
       {activeTab === "results" ? (
         <ResultsScreen busy={busy} matches={matches} results={results} onSave={handleResult} />
       ) : null}
-      {activeTab === "rules" ? <RulesScreen deadline={deadline} /> : null}
+      {activeTab === "rules" ? <RulesScreen /> : null}
 
       <BottomNav activeTab={activeTab} onChange={setActiveTab} />
     </main>

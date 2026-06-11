@@ -1,10 +1,6 @@
 import { ListChecks } from "lucide-react";
 
-interface RulesScreenProps {
-  deadline: Date;
-}
-
-export function RulesScreen({ deadline }: RulesScreenProps) {
+export function RulesScreen() {
   return (
     <section className="screen-stack">
       <div className="section-title">
@@ -14,15 +10,15 @@ export function RulesScreen({ deadline }: RulesScreenProps) {
       <div className="rules-grid">
         <article>
           <strong>Partidos</strong>
-          <p>5 pts por ganador o empate. 10 pts si además clavas marcador.</p>
+          <p>5 pts por ganador o empate. 10 pts si ademas clavas marcador.</p>
         </article>
         <article>
-          <strong>Pódium</strong>
-          <p>30 campeón, 20 subcampeón, 10 tercer lugar.</p>
+          <strong>Podium</strong>
+          <p>30 campeon, 20 subcampeon, 10 tercer lugar.</p>
         </article>
         <article>
-          <strong>Cierre</strong>
-          <p>{deadline.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}.</p>
+          <strong>Abierta</strong>
+          <p>Los participantes pueden enviar picks cualquier dia.</p>
         </article>
         <article>
           <strong>Postponed/cancelado</strong>

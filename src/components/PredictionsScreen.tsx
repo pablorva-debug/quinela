@@ -8,7 +8,6 @@ interface PredictionsScreenProps {
   canSubmit: boolean;
   completeCount: number;
   currentSubmission?: Submission;
-  deadline: Date;
   draftSavedAt: string;
   matches: Match[];
   podium: PodiumPick;
@@ -45,7 +44,6 @@ export function PredictionsScreen({
   canSubmit,
   completeCount,
   currentSubmission,
-  deadline,
   draftSavedAt,
   matches,
   podium,
@@ -67,7 +65,7 @@ export function PredictionsScreen({
     <section className="screen-stack">
       <section className="status-band">
         <div>
-          <p className="eyebrow">Cierra el 11 de junio de 2026</p>
+          <p className="eyebrow">Quiniela abierta</p>
           <h2>{locked ? "Tus picks ya quedaron bloqueados." : `${completeCount}/${matches.length} partidos`}</h2>
         </div>
         <div className="progress-ring" style={{ "--progress": `${progress}%` } as CSSProperties}>
@@ -101,7 +99,7 @@ export function PredictionsScreen({
       <section className="podium-panel">
         <div className="section-title">
           <Sparkles aria-hidden="true" size={20} />
-          <h2>Pódium</h2>
+          <h2>Podium</h2>
         </div>
         <div className="suggestion-line">
           Sugerido: {suggestedPodium.champion || "-"} / {suggestedPodium.runnerUp || "-"} /{" "}
@@ -114,7 +112,7 @@ export function PredictionsScreen({
         </div>
         <div className="podium-grid">
           <label>
-            Campeón
+            Campeon
             <input
               disabled={locked}
               value={podium.champion}
@@ -122,7 +120,7 @@ export function PredictionsScreen({
             />
           </label>
           <label>
-            Subcampeón
+            Subcampeon
             <input
               disabled={locked}
               value={podium.runnerUp}
@@ -147,7 +145,9 @@ export function PredictionsScreen({
             {locked
               ? "Enviado"
               : draftSavedAt
-                ? `Guardado ${new Intl.DateTimeFormat("es-MX", { hour: "2-digit", minute: "2-digit" }).format(new Date(draftSavedAt))}`
+                ? `Guardado ${new Intl.DateTimeFormat("es-MX", { hour: "2-digit", minute: "2-digit" }).format(
+                    new Date(draftSavedAt)
+                  )}`
                 : ""}
           </span>
         </div>
