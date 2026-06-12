@@ -1,7 +1,8 @@
-﻿import { Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { Match, MatchResult } from "../types";
+import { sortMatchesByKickoff } from "../lib/matchOrder";
 import { getResultStatus, getResultWinner } from "../lib/results";
+import type { Match, MatchResult } from "../types";
 
 interface ResultsScreenProps {
   busy: boolean;
@@ -13,6 +14,10 @@ interface ResultsScreenProps {
 export function ResultsScreen({ busy, matches, results, onSave }: ResultsScreenProps) {
   const resultByMatch = useMemo(() => new Map(results.map((result) => [result.matchId, result])), [results]);
   const [selectedPhase, setSelectedPhase] = useState<Match["phase"]>("group");
+  const phaseMatches = useMemo(
+    () => sortMatchesByKickoff(matches.filter((match) => match.phase === selectedPhase)),
+    [matches, selectedPhase]
+  );
 
   return (
     <section className="screen-stack">
@@ -31,17 +36,15 @@ export function ResultsScreen({ busy, matches, results, onSave }: ResultsScreenP
         <option value="final">Final</option>
       </select>
       <div className="match-list">
-        {matches
-          .filter((match) => match.phase === selectedPhase)
-          .map((match) => (
-            <ResultEditor
-              busy={busy}
-              key={match.id}
-              match={match}
-              result={resultByMatch.get(match.id)}
-              onSave={onSave}
-            />
-          ))}
+        {phaseMatches.map((match) => (
+          <ResultEditor
+            busy={busy}
+            key={match.id}
+            match={match}
+            result={resultByMatch.get(match.id)}
+            onSave={onSave}
+          />
+        ))}
       </div>
     </section>
   );
@@ -86,7 +89,7 @@ function ResultEditor({ busy, match, result, onSave }: ResultEditorProps) {
         <span>{status === "finished" ? "Final" : "Pendiente"}</span>
       </div>
       <p className="fixture-line">
-        {kickoff} · {match.venue}
+        {kickoff} - {match.venue}
       </p>
       <div className="score-row">
         <span className="team-name">{match.home}</span>
@@ -126,4 +129,3 @@ function ResultEditor({ busy, match, result, onSave }: ResultEditorProps) {
     </article>
   );
 }
-

@@ -2,6 +2,7 @@ import { UsersRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getGamePredictionRows } from "../lib/gamePredictions";
 import { getGameResultState } from "../lib/gameStatus";
+import { sortMatchesByKickoff } from "../lib/matchOrder";
 import type { Match, MatchResult, Submission } from "../types";
 
 interface GamePredictionsScreenProps {
@@ -42,7 +43,7 @@ function formatKickoff(kickoff: string): string {
 export function GamePredictionsScreen({ matches, results, submissions }: GamePredictionsScreenProps) {
   const [selectedPhase, setSelectedPhase] = useState<Match["phase"]>("group");
   const phaseMatches = useMemo(
-    () => matches.filter((match) => match.phase === selectedPhase),
+    () => sortMatchesByKickoff(matches.filter((match) => match.phase === selectedPhase)),
     [matches, selectedPhase]
   );
   const resultByMatch = useMemo(() => new Map(results.map((result) => [result.matchId, result])), [results]);
