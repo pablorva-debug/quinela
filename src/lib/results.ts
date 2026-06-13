@@ -23,3 +23,9 @@ export function getResultWinner(
 export function getResultStatus(homeScore: number | "", awayScore: number | ""): MatchResult["status"] {
   return homeScore === "" || awayScore === "" ? "pending" : "finished";
 }
+
+export function getPendingResultMatches(matches: Match[], results: MatchResult[]): Match[] {
+  const resultByMatch = new Map(results.map((result) => [result.matchId, result]));
+
+  return matches.filter((match) => resultByMatch.get(match.id)?.status !== "finished");
+}

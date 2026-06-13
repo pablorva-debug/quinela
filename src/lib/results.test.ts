@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Match } from "../types";
-import { getResultStatus, getResultWinner } from "./results";
+import type { Match, MatchResult } from "../types";
+import { getPendingResultMatches, getResultStatus, getResultWinner } from "./results";
 
 const groupMatch: Match = {
   id: "g-1",
@@ -43,5 +43,29 @@ describe("getResultStatus", () => {
     expect(getResultStatus(2, 1)).toBe("finished");
     expect(getResultStatus("", 1)).toBe("pending");
     expect(getResultStatus(2, "")).toBe("pending");
+  });
+});
+
+describe("getPendingResultMatches", () => {
+  it("hides matches with a saved final result", () => {
+    const pendingMatch = { ...groupMatch, id: "g-2" };
+    const results: MatchResult[] = [
+      {
+        matchId: groupMatch.id,
+        homeScore: 2,
+        awayScore: 1,
+        status: "finished",
+        updatedAt: "2026-06-11T21:00:00.000Z"
+      },
+      {
+        matchId: pendingMatch.id,
+        homeScore: "",
+        awayScore: "",
+        status: "pending",
+        updatedAt: "2026-06-11T21:00:00.000Z"
+      }
+    ];
+
+    expect(getPendingResultMatches([groupMatch, pendingMatch], results)).toEqual([pendingMatch]);
   });
 });

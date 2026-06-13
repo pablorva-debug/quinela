@@ -1,7 +1,7 @@
 import { Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import { sortMatchesByKickoff } from "../lib/matchOrder";
-import { getResultStatus, getResultWinner } from "../lib/results";
+import { getPendingResultMatches, getResultStatus, getResultWinner } from "../lib/results";
 import type { Match, MatchResult } from "../types";
 
 interface ResultsScreenProps {
@@ -15,8 +15,8 @@ export function ResultsScreen({ busy, matches, results, onSave }: ResultsScreenP
   const resultByMatch = useMemo(() => new Map(results.map((result) => [result.matchId, result])), [results]);
   const [selectedPhase, setSelectedPhase] = useState<Match["phase"]>("group");
   const phaseMatches = useMemo(
-    () => sortMatchesByKickoff(matches.filter((match) => match.phase === selectedPhase)),
-    [matches, selectedPhase]
+    () => sortMatchesByKickoff(getPendingResultMatches(matches, results).filter((match) => match.phase === selectedPhase)),
+    [matches, results, selectedPhase]
   );
 
   return (
@@ -35,17 +35,21 @@ export function ResultsScreen({ busy, matches, results, onSave }: ResultsScreenP
         <option value="thirdPlace">Tercer lugar</option>
         <option value="final">Final</option>
       </select>
-      <div className="match-list">
-        {phaseMatches.map((match) => (
-          <ResultEditor
-            busy={busy}
-            key={match.id}
-            match={match}
-            result={resultByMatch.get(match.id)}
-            onSave={onSave}
-          />
-        ))}
-      </div>
+      {phaseMatches.length === 0 ? (
+        <p className="empty-state">Ya no hay partidos pendientes por capturar en esta fase.</p>
+      ) : (
+        <div className="match-list">
+          {phaseMatches.map((match) => (
+            <ResultEditor
+              busy={busy}
+              key={match.id}
+              match={match}
+              result={resultByMatch.get(match.id)}
+              onSave={onSave}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
