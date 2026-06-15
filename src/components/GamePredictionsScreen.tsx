@@ -1,7 +1,7 @@
 import { UsersRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getGamePredictionRows } from "../lib/gamePredictions";
-import { getGameResultState } from "../lib/gameStatus";
+import { filterMatchesByResultView, getGameResultState, type GameResultView } from "../lib/gameStatus";
 import { sortMatchesByKickoff } from "../lib/matchOrder";
 import type { Match, MatchResult, Submission } from "../types";
 
@@ -42,9 +42,13 @@ function formatKickoff(kickoff: string): string {
 
 export function GamePredictionsScreen({ matches, results, submissions }: GamePredictionsScreenProps) {
   const [selectedPhase, setSelectedPhase] = useState<Match["phase"]>("group");
+  const [selectedView, setSelectedView] = useState<GameResultView>("upcoming");
   const phaseMatches = useMemo(
-    () => sortMatchesByKickoff(matches.filter((match) => match.phase === selectedPhase)),
-    [matches, selectedPhase]
+    () =>
+      sortMatchesByKickoff(
+        filterMatchesByResultView(matches, results, selectedView).filter((match) => match.phase === selectedPhase)
+      ),
+    [matches, results, selectedPhase, selectedView]
   );
   const resultByMatch = useMemo(() => new Map(results.map((result) => [result.matchId, result])), [results]);
 
@@ -53,6 +57,22 @@ export function GamePredictionsScreen({ matches, results, submissions }: GamePre
       <div className="section-title">
         <UsersRound aria-hidden="true" size={20} />
         <h2>Picks por juego</h2>
+      </div>
+      <div className="view-switch" role="group" aria-label="Vista de juegos">
+        <button
+          className={selectedView === "upcoming" ? "active" : ""}
+          type="button"
+          onClick={() => setSelectedView("upcoming")}
+        >
+          Proximos Partidos
+        </button>
+        <button
+          className={selectedView === "historical" ? "active" : ""}
+          type="button"
+          onClick={() => setSelectedView("historical")}
+        >
+          Historico
+        </button>
       </div>
       <select value={selectedPhase} onChange={(event) => setSelectedPhase(event.target.value as Match["phase"])}>
         {phases.map((phase) => (
@@ -64,6 +84,12 @@ export function GamePredictionsScreen({ matches, results, submissions }: GamePre
 
       {submissions.length === 0 ? (
         <p className="empty-state">Todavia no hay picks enviados.</p>
+      ) : phaseMatches.length === 0 ? (
+        <p className="empty-state">
+          {selectedView === "historical"
+            ? "Todavia no hay partidos en el historico para esta fase."
+            : "No hay proximos partidos en esta fase."}
+        </p>
       ) : (
         <div className="match-list">
           {phaseMatches.map((match) => {

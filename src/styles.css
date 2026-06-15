@@ -299,6 +299,33 @@ p {
   margin: 12px 0 0;
 }
 
+.view-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  border: 1px solid rgba(16, 33, 25, 0.13);
+  border-radius: 8px;
+  padding: 4px;
+  background: rgba(255, 253, 247, 0.88);
+}
+
+.view-switch button {
+  border: 0;
+  border-radius: 6px;
+  min-height: 40px;
+  padding: 0 10px;
+  color: #64746a;
+  font-size: 0.82rem;
+  font-weight: 900;
+  background: transparent;
+}
+
+.view-switch button.active {
+  color: #fffdf7;
+  background: #0d503b;
+  box-shadow: 0 8px 22px rgba(13, 80, 59, 0.18);
+}
+
 .podium-grid {
   display: grid;
   gap: 10px;

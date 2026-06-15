@@ -53,6 +53,27 @@ describe("matches template", () => {
       kickoff: "2026-06-19T01:00:00.000Z",
       venue: "Estadio Akron"
     });
+    expect(matches.find((match) => match.id === "GD-4")).toMatchObject({
+      home: "United States",
+      away: "Australia",
+      kickoff: "2026-06-20T03:00:00.000Z"
+    });
+    expect(matches.find((match) => match.id === "GE-1")).toMatchObject({
+      home: "Ivory Coast",
+      away: "Ecuador",
+      kickoff: "2026-06-14T23:00:00.000Z"
+    });
+    expect(matches.find((match) => match.id === "GC-4")).toMatchObject({
+      home: "Brazil",
+      away: "Haiti",
+      kickoff: "2026-06-20T00:30:00.000Z"
+    });
+    expect(matches.find((match) => match.id === "roundOf32-5")).toMatchObject({
+      kickoff: "2026-06-30T21:00:00.000Z"
+    });
+    expect(matches.find((match) => match.id === "roundOf16-1")).toMatchObject({
+      kickoff: "2026-07-04T21:00:00.000Z"
+    });
     expect(matches.find((match) => match.id === "roundOf32-1")).toMatchObject({
       kickoff: "2026-06-28T19:00:00.000Z",
       venue: "SoFi Stadium"
@@ -61,6 +82,27 @@ describe("matches template", () => {
       kickoff: "2026-07-19T19:00:00.000Z",
       venue: "MetLife Stadium"
     });
+  });
+
+  it("uses team names from the spreadsheet", () => {
+    const allTeams = matches.flatMap((match) => [match.home, match.away]);
+
+    expect(allTeams).toContain("Czech Republic");
+    expect(allTeams).toContain("United States");
+    expect(allTeams).toContain("Turkey");
+    expect(allTeams).toContain("Ivory Coast");
+    expect(allTeams).toContain("Cape Verde");
+    expect(allTeams).toContain("Iran");
+    expect(allTeams).toContain("DR Congo");
+    expect(allTeams).toContain("Curaçao");
+    expect(allTeams).not.toContain("Czechia");
+    expect(allTeams).not.toContain("USA");
+    expect(allTeams).not.toContain("Turkiye");
+    expect(allTeams).not.toContain("Cote d'Ivoire");
+    expect(allTeams).not.toContain("Cabo Verde");
+    expect(allTeams).not.toContain("IR Iran");
+    expect(allTeams).not.toContain("Congo DR");
+    expect(allTeams).not.toContain("Curacao");
   });
 
   it("does not schedule a group-stage team twice on the same UTC date", () => {
